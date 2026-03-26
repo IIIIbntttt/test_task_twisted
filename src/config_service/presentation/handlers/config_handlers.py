@@ -1,7 +1,9 @@
-"""Standalone-хендлеры для HTTP-эндпоинтов. Каждая функция получает нужный use case через functools.partial."""
+"""Standalone-хендлеры для HTTP-эндпоинтов.
 
-import json
+Каждая функция получает нужный use case через functools.partial.
+"""
 
+import orjson
 from twisted.internet import defer
 from twisted.web.http import Request
 
@@ -19,17 +21,20 @@ from config_service.domain.exceptions import (
     InvalidYamlError,
     ValidationError,
 )
+from config_service.presentation.utils.request_utils import parse_template_context
 
 
 def _json(request: Request, status: int, data: object) -> bytes:
     """Формирует JSON-ответ с нужным статус-кодом."""
     request.setResponseCode(status)
     request.setHeader(b"Content-Type", b"application/json")
-    return json.dumps(data).encode()
+    return orjson.dumps(data)
 
 
 @defer.inlineCallbacks
-def post_config(save_uc: SaveConfigUseCase, request: Request, service: str) -> defer.Deferred[bytes]:
+def create_config(
+    save_uc: SaveConfigUseCase, request: Request, service: str
+) -> defer.Deferred[bytes]:
     """Сохраняет новую конфигурацию для сервиса."""
     body = request.content.read().decode("utf-8")
     try:
@@ -50,18 +55,13 @@ def post_config(save_uc: SaveConfigUseCase, request: Request, service: str) -> d
 
 
 @defer.inlineCallbacks
-def get_config(get_uc: GetConfigUseCase, request: Request, service: str) -> defer.Deferred[bytes]:
+def get_config(
+    get_uc: GetConfigUseCase, request: Request, service: str
+) -> defer.Deferred[bytes]:
     """Возвращает конфигурацию сервиса. Поддерживает выбор версии и Jinja2-рендеринг."""
     version_raw = request.args.get(b"version", [None])[0]
     version = int(version_raw) if version_raw is not None else None
-
     use_template = request.args.get(b"template", [b"0"])[0] == b"1"
-
-    context: dict[str, str] = {}
-    if use_template:
-        for key, values in request.args.items():
-            if key not in (b"version", b"template"):
-                context[key.decode()] = values[0].decode()
 
     try:
         result = yield get_uc.execute(
@@ -69,7 +69,7 @@ def get_config(get_uc: GetConfigUseCase, request: Request, service: str) -> defe
                 service=service,
                 version=version,
                 use_template=use_template,
-                template_context=context,
+                template_context=parse_template_context(request),
             )
         )
         return _json(request, 200, result.payload)
@@ -78,17 +78,12 @@ def get_config(get_uc: GetConfigUseCase, request: Request, service: str) -> defe
 
 
 @defer.inlineCallbacks
-def get_history(history_uc: GetHistoryUseCase, request: Request, service: str) -> defer.Deferred[bytes]:
+def get_history(
+    history_uc: GetHistoryUseCase, request: Request, service: str
+) -> defer.Deferred[bytes]:
     """Возвращает историю версий конфигурации для сервиса."""
     try:
         result = yield history_uc.execute(GetHistoryRequest(service=service))
-        items = [
-            {
-                "version": item.version,
-                "created_at": item.created_at.isoformat(),
-            }
-            for item in result.items
-        ]
-        return _json(request, 200, items)
+        return _json(request, 200, [item.to_dict() for item in result.items])
     except ConfigurationNotFoundError as exc:
         return _json(request, 404, {"error": str(exc)})

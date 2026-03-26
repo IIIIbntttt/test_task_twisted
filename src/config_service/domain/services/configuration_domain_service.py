@@ -1,7 +1,8 @@
 """Доменные правила валидации конфигурации."""
 
 # Поля, которые обязаны присутствовать в каждой загружаемой конфигурации.
-# Задаются кортежами вложенных ключей: ("database", "host") означает payload["database"]["host"].
+# Задаются кортежами вложенных ключей:
+# ("database", "host") означает payload["database"]["host"].
 REQUIRED_FIELDS: list[tuple[str, ...]] = [
     ("database", "host"),
     ("database", "port"),
@@ -9,7 +10,10 @@ REQUIRED_FIELDS: list[tuple[str, ...]] = [
 
 
 def validate_payload(payload: dict[str, object]) -> list[str]:
-    """Вернуть список сообщений об ошибках валидации (пустой список — конфигурация валидна)."""
+    """Вернуть список сообщений об ошибках валидации.
+
+    Пустой список означает что конфигурация валидна.
+    """
     errors: list[str] = []
     for path in REQUIRED_FIELDS:
         node: object = payload

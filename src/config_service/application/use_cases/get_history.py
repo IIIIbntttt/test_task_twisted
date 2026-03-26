@@ -16,7 +16,7 @@ class GetHistoryUseCase:
         configs = yield self._repository.get_history(request.service)
 
         items = [
-            HistoryItem(version=c.version, created_at=c.created_at)  # type: ignore[arg-type]
-            for c in configs
+            HistoryItem(version=config.version, created_at=config.created_at)  # type: ignore[arg-type]
+            for config in configs
         ]
         return GetHistoryResponse(items=items)

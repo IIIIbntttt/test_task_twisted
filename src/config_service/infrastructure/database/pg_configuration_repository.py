@@ -43,7 +43,8 @@ class PgConfigurationRepository(IConfigurationRepository):
             )
         except psycopg2.IntegrityError:
             raise DuplicateVersionError(
-                f"Version {config.version} already exists for service '{config.service}'"
+                f"Version {config.version} already exists"
+                f" for service '{config.service}'"
             )
 
     @defer.inlineCallbacks
@@ -81,7 +82,8 @@ class PgConfigurationRepository(IConfigurationRepository):
     @defer.inlineCallbacks
     def get_next_version(self, service: str) -> defer.Deferred:
         rows = yield self._pool.runQuery(
-            "SELECT COALESCE(MAX(version), 0) + 1 FROM configurations WHERE service = %s",
+            "SELECT COALESCE(MAX(version), 0) + 1"
+            " FROM configurations WHERE service = %s",
             (service,),
         )
         return int(rows[0][0])

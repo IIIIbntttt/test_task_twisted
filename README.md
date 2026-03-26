@@ -20,13 +20,40 @@ docker-compose up --build
 ### Требования
 
 - Python 3.12+
-- [uv](https://github.com/astral-sh/uv)
+- [uv](https://docs.astral.sh/uv/)
 - Запущенный PostgreSQL
+
+### Установка uv
+
+```bash
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Homebrew
+brew install uv
+```
 
 ### Установка зависимостей
 
 ```bash
-uv pip install -e .
+# Создать виртуальное окружение и установить все зависимости из pyproject.toml
+uv sync
+
+# Установить вместе с dev-зависимостями
+uv sync --group dev
+```
+
+### Добавление зависимости
+
+```bash
+# Продакшн-зависимость
+uv add <package>
+
+# Dev-зависимость
+uv add --dev <package>
 ```
 
 ### Переменные окружения
@@ -50,7 +77,7 @@ cp .env.example .env
 
 ```bash
 export $(cat .env | xargs)
-config-service
+uv run config-service
 ```
 
 ---
@@ -59,7 +86,7 @@ config-service
 
 ### POST `/config/{service}`
 
-Загрузить новую конфигурацию. Тело запроса — YAML.
+Загрузить новую конфигурацию. Тело запроса YAML.
 
 ```bash
 curl -X POST http://localhost:8080/config/my_service \
@@ -140,8 +167,7 @@ curl http://localhost:8080/config/my_service/history
 ## Тесты
 
 ```bash
-uv pip install -e ".[dev]"
-pytest
+uv run pytest
 ```
 
 ---
@@ -149,7 +175,7 @@ pytest
 ## Линтинг и типизация
 
 ```bash
-ruff check src tests
-ruff format src tests
-mypy src
+uv run ruff check src tests
+uv run ruff format src tests
+uv run mypy src
 ```

@@ -1,4 +1,7 @@
-"""Декларативный DI-контейнер. Граф зависимостей описан явно, pool передаётся снаружи."""
+"""Декларативный DI-контейнер.
+
+Граф зависимостей описан явно, pool передаётся снаружи.
+"""
 
 from dependency_injector import containers, providers
 from klein import Klein
@@ -10,31 +13,29 @@ from config_service.application.use_cases.save_config import SaveConfigUseCase
 from config_service.infrastructure.database.pg_configuration_repository import (
     PgConfigurationRepository,
 )
-from config_service.infrastructure.serialization.yaml_parser import YamlParser
-from config_service.infrastructure.templating.jinja_processor import JinjaProcessor
+from config_service.infrastructure.serialization.yaml_parser import parse_yaml
+from config_service.infrastructure.templating.jinja_processor import render_jinja
 from config_service.presentation.resources.config_resource import ConfigResource
 from config_service.presentation.resources.routes import setup_routes
 
 
 class AppContainer(containers.DeclarativeContainer):
-    # Внешняя зависимость — передаётся через override при старте
+    # Внешняя зависимость, передаётся через override при старте
     pool = providers.Dependency(instance_of=adbapi.ConnectionPool)
 
     # Инфраструктура
     repository = providers.Singleton(PgConfigurationRepository, pool=pool)
-    yaml_parser = providers.Singleton(YamlParser)
-    jinja_processor = providers.Singleton(JinjaProcessor)
 
     # Use cases
     save_uc = providers.Singleton(
         SaveConfigUseCase,
         repository=repository,
-        yaml_parser=yaml_parser,
+        yaml_parser=providers.Object(parse_yaml),
     )
     get_uc = providers.Singleton(
         GetConfigUseCase,
         repository=repository,
-        jinja_processor=jinja_processor,
+        jinja_renderer=providers.Object(render_jinja),
     )
     history_uc = providers.Singleton(
         GetHistoryUseCase,

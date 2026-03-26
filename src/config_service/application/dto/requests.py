@@ -7,11 +7,11 @@ class SaveConfigRequest:
     yaml_content: str
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class GetConfigRequest:
     service: str
-    version: int | None = field(default=None)
-    use_template: bool = field(default=False)
+    version: int | None = None
+    use_template: bool =False
     template_context: dict[str, str] = field(default_factory=dict)
 
 

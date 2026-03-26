@@ -1,5 +1,3 @@
-import pytest
-
 from config_service.domain.services.configuration_domain_service import validate_payload
 
 

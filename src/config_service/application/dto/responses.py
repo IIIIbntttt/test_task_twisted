@@ -19,6 +19,9 @@ class HistoryItem:
     version: int
     created_at: datetime
 
+    def to_dict(self) -> dict[str, object]:
+        return {"version": self.version, "created_at": self.created_at.isoformat()}
+
 
 @dataclass
 class GetHistoryResponse:

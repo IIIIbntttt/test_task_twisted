@@ -40,7 +40,9 @@ def test_save_config_with_explicit_version() -> None:
     repo.save.return_value = resolved(None)
 
     uc = _make_use_case(repo)
-    result = yield uc.execute(SaveConfigRequest(service="svc", yaml_content=_VALID_YAML))
+    result = yield uc.execute(
+        SaveConfigRequest(service="svc", yaml_content=_VALID_YAML)
+    )
 
     assert result.version == 1
     assert result.status == "saved"

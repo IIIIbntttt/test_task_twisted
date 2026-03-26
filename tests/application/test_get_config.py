@@ -32,7 +32,7 @@ def _make_get_uc(repo: MagicMock) -> GetConfigUseCase:
     return GetConfigUseCase(repo, JinjaProcessor())
 
 
-# --- GetConfigUseCase ---
+# GetConfigUseCase
 
 
 @pytest.inlineCallbacks  # type: ignore[misc]
@@ -66,7 +66,11 @@ def test_template_rendering() -> None:
 
     uc = _make_get_uc(repo)
     result = yield uc.execute(
-        GetConfigRequest(service="svc", use_template=True, template_context={"user": "Alice"})
+        GetConfigRequest(
+            service="svc",
+            use_template=True,
+            template_context={"user": "Alice"},
+        )
     )
 
     assert result.payload["welcome_message"] == "Hello Alice!"
@@ -83,7 +87,7 @@ def test_not_found_propagates() -> None:
         yield uc.execute(GetConfigRequest(service="missing"))
 
 
-# --- GetHistoryUseCase ---
+# GetHistoryUseCase
 
 
 @pytest.inlineCallbacks  # type: ignore[misc]
