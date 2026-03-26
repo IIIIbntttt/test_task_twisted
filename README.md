@@ -43,7 +43,7 @@ brew install uv
 uv sync
 
 # Установить вместе с dev-зависимостями
-uv sync --group dev
+uv sync --dev
 ```
 
 ### Добавление зависимости

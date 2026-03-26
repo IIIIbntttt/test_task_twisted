@@ -11,7 +11,7 @@ class SaveConfigRequest:
 class GetConfigRequest:
     service: str
     version: int | None = None
-    use_template: bool =False
+    use_template: bool = False
     template_context: dict[str, str] = field(default_factory=dict)
 
 

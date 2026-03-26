@@ -41,11 +41,15 @@ def create_config(
         result = yield save_uc.execute(
             SaveConfigRequest(service=service, yaml_content=body)
         )
-        return _json(request, 200, {
-            "service": result.service,
-            "version": result.version,
-            "status": result.status,
-        })
+        return _json(
+            request,
+            200,
+            {
+                "service": result.service,
+                "version": result.version,
+                "status": result.status,
+            },
+        )
     except InvalidYamlError as exc:
         return _json(request, 400, {"error": str(exc)})
     except ValidationError as exc:

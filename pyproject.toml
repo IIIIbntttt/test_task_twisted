@@ -10,10 +10,9 @@ dependencies = [
     "jinja2",
     "dependency-injector",
     "orjson",
-    "ruff>=0.15.7",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest",
     "pytest-twisted",
