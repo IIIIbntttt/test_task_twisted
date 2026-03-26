@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "Config Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "service",
+      "value": "my_service"
+    }
+  ],
+  "item": [
+    {
+      "name": "POST /config — сохранить конфигурацию (с version)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/plain" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "version: 1\ndatabase:\n  host: db.local\n  port: 5432\nfeatures:\n  enable_auth: true\n  enable_cache: false\n"
+        }
+      }
+    },
+    {
+      "name": "POST /config — сохранить конфигурацию (без version, автоинкремент)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/plain" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "database:\n  host: db.local\n  port: 5432\nfeatures:\n  enable_auth: false\n"
+        }
+      }
+    },
+    {
+      "name": "POST /config — 400 невалидный YAML",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/plain" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "key: [unclosed bracket\n"
+        }
+      }
+    },
+    {
+      "name": "POST /config — 422 отсутствуют обязательные поля",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/plain" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "version: 99\nfeatures:\n  flag: true\n"
+        }
+      }
+    },
+    {
+      "name": "POST /config — 409 дубликат версии",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "text/plain" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "version: 1\ndatabase:\n  host: db.local\n  port: 5432\n"
+        }
+      }
+    },
+    {
+      "name": "GET /config — актуальная версия",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}"]
+        }
+      }
+    },
+    {
+      "name": "GET /config — конкретная версия (?version=1)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}?version=1",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}"],
+          "query": [
+            { "key": "version", "value": "1" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "GET /config — с Jinja2 шаблоном (?template=1)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}?template=1&user=Alice",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}"],
+          "query": [
+            { "key": "template", "value": "1" },
+            { "key": "user", "value": "Alice" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "GET /config — 404 сервис не найден",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/config/unknown_service",
+          "host": ["{{base_url}}"],
+          "path": ["config", "unknown_service"]
+        }
+      }
+    },
+    {
+      "name": "GET /config/history — история версий",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/config/{{service}}/history",
+          "host": ["{{base_url}}"],
+          "path": ["config", "{{service}}", "history"]
+        }
+      }
+    },
+    {
+      "name": "GET /config/history — 404 сервис не найден",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/config/unknown_service/history",
+          "host": ["{{base_url}}"],
+          "path": ["config", "unknown_service", "history"]
+        }
+      }
+    }
+  ]
+}
