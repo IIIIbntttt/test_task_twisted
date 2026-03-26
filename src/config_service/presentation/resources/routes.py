@@ -1,6 +1,7 @@
 """Регистрация маршрутов на существующем Klein-приложении."""
 
-from functools import partial
+from functools import partial, update_wrapper
+from typing import Any, Callable
 
 from klein import Klein
 
@@ -12,16 +13,23 @@ from config_service.presentation.handlers.config_handlers import (
 from config_service.presentation.resources.config_resource import ConfigResource
 
 
+def _bind(func: Callable[..., Any], *args: Any) -> Callable[..., Any]:
+    """Создаёт partial с сохранённым __name__ — Klein требует его при регистрации маршрута."""
+    p = partial(func, *args)
+    update_wrapper(p, func)
+    return p
+
+
 def setup_routes(app: Klein, resource: ConfigResource) -> Klein:
     """Регистрирует все маршруты на переданном приложении. Само приложение не создаёт."""
     app.route("/config/<string:service>", methods=["POST"])(
-        partial(post_config, resource.save_uc)
+        _bind(post_config, resource.save_uc)
     )
     app.route("/config/<string:service>", methods=["GET"])(
-        partial(get_config, resource.get_uc)
+        _bind(get_config, resource.get_uc)
     )
     app.route("/config/<string:service>/history", methods=["GET"])(
-        partial(get_history, resource.history_uc)
+        _bind(get_history, resource.history_uc)
     )
 
     return app
