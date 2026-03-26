@@ -1,3 +1,5 @@
+from typing import cast
+
 import yaml
 
 from config_service.domain.exceptions import InvalidYamlError
@@ -13,4 +15,4 @@ def parse_yaml(content: str) -> dict[str, object]:
     if not isinstance(result, dict):
         raise InvalidYamlError("YAML must be a mapping at the top level")
 
-    return result  # type: ignore[return-value]
+    return cast(dict[str, object], result)

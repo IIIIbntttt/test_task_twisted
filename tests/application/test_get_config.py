@@ -8,7 +8,7 @@ from config_service.application.use_cases.get_config import GetConfigUseCase
 from config_service.application.use_cases.get_history import GetHistoryUseCase
 from config_service.domain.entities.configuration import Configuration
 from config_service.domain.exceptions import ConfigurationNotFoundError
-from config_service.infrastructure.templating.jinja_processor import JinjaProcessor
+from config_service.infrastructure.templating.jinja_processor import render_jinja
 from tests.conftest import resolved
 
 _PAYLOAD = {
@@ -29,7 +29,7 @@ def _config(payload: dict = _PAYLOAD) -> Configuration:  # type: ignore[type-arg
 
 
 def _make_get_uc(repo: MagicMock) -> GetConfigUseCase:
-    return GetConfigUseCase(repo, JinjaProcessor())
+    return GetConfigUseCase(repo, render_jinja)
 
 
 # GetConfigUseCase

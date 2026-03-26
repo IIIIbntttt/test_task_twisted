@@ -14,9 +14,10 @@ from config_service.domain.repositories.i_configuration_repository import (
 )
 
 
-def _row_to_configuration(row: tuple) -> Configuration:  # type: ignore[type-arg]
+def _row_to_configuration(row: tuple[object, ...]) -> Configuration:
     payload = row[3]
     if isinstance(payload, str):
+        # Резервный путь: JSONB-кодек не зарегистрирован, парсим вручную
         payload = json.loads(payload)
     return Configuration(
         id=row[0],
@@ -32,7 +33,7 @@ class PgConfigurationRepository(IConfigurationRepository):
         self._pool = pool
 
     @defer.inlineCallbacks
-    def save(self, config: Configuration) -> defer.Deferred:
+    def save(self, config: Configuration) -> defer.Deferred[None]:
         try:
             yield self._pool.runOperation(
                 """
@@ -48,7 +49,7 @@ class PgConfigurationRepository(IConfigurationRepository):
             )
 
     @defer.inlineCallbacks
-    def get_latest(self, service: str) -> defer.Deferred:
+    def get_latest(self, service: str) -> defer.Deferred[Configuration]:
         rows = yield self._pool.runQuery(
             """
             SELECT id, service, version, payload, created_at
@@ -64,7 +65,9 @@ class PgConfigurationRepository(IConfigurationRepository):
         return _row_to_configuration(rows[0])
 
     @defer.inlineCallbacks
-    def get_by_version(self, service: str, version: int) -> defer.Deferred:
+    def get_by_version(
+        self, service: str, version: int
+    ) -> defer.Deferred[Configuration]:
         rows = yield self._pool.runQuery(
             """
             SELECT id, service, version, payload, created_at
@@ -80,7 +83,7 @@ class PgConfigurationRepository(IConfigurationRepository):
         return _row_to_configuration(rows[0])
 
     @defer.inlineCallbacks
-    def get_next_version(self, service: str) -> defer.Deferred:
+    def get_next_version(self, service: str) -> defer.Deferred[int]:
         rows = yield self._pool.runQuery(
             "SELECT COALESCE(MAX(version), 0) + 1"
             " FROM configurations WHERE service = %s",
@@ -89,10 +92,10 @@ class PgConfigurationRepository(IConfigurationRepository):
         return int(rows[0][0])
 
     @defer.inlineCallbacks
-    def get_history(self, service: str) -> defer.Deferred:
+    def get_history(self, service: str) -> defer.Deferred[list[Configuration]]:
         rows = yield self._pool.runQuery(
             """
-            SELECT id, service, version, NULL AS payload, created_at
+            SELECT id, service, version, created_at
             FROM configurations
             WHERE service = %s
             ORDER BY version ASC
@@ -107,7 +110,7 @@ class PgConfigurationRepository(IConfigurationRepository):
                 service=row[1],
                 version=row[2],
                 payload={},
-                created_at=row[4],
+                created_at=row[3],
             )
             for row in rows
         ]

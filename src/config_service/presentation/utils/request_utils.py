@@ -12,6 +12,6 @@ def parse_template_context(request: Request) -> dict[str, str]:
     """
     return {
         key.decode(): values[0].decode()
-        for key, values in request.args.items()
+        for key, values in (request.args or {}).items()
         if key not in RESERVED_PARAMS
     }

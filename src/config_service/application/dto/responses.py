@@ -8,6 +8,9 @@ class SaveConfigResponse:
     version: int
     status: str
 
+    def to_dict(self) -> dict[str, object]:
+        return {"service": self.service, "version": self.version, "status": self.status}
+
 
 @dataclass
 class GetConfigResponse:

@@ -21,8 +21,10 @@ class SaveConfigUseCase:
         self._repository = repository
         self._yaml_parser = yaml_parser
 
-    @defer.inlineCallbacks
-    def execute(self, request: SaveConfigRequest) -> defer.Deferred:
+    @defer.inlineCallbacks  # type: ignore[arg-type]
+    def execute(  # type: ignore[misc]
+        self, request: SaveConfigRequest
+    ) -> defer.Deferred[SaveConfigResponse]:
         payload = self._yaml_parser(request.yaml_content)
 
         errors = validate_payload(payload)
@@ -33,7 +35,7 @@ class SaveConfigUseCase:
             next_version = yield self._repository.get_next_version(request.service)
             payload["version"] = next_version
 
-        version = int(payload["version"])  # type: ignore[arg-type]
+        version = int(str(payload["version"]))
 
         config = Configuration(
             service=request.service,

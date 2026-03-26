@@ -9,7 +9,7 @@ from config_service.infrastructure.database.migrations import run_migrations
 
 
 @defer.inlineCallbacks
-def _setup() -> defer.Deferred:
+def _setup() -> defer.Deferred[None]:
     pool = create_connection_pool()
     yield run_migrations(pool)
 

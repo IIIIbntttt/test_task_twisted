@@ -20,8 +20,10 @@ class GetConfigUseCase:
         self._repository = repository
         self._jinja_renderer = jinja_renderer
 
-    @defer.inlineCallbacks
-    def execute(self, request: GetConfigRequest) -> defer.Deferred:
+    @defer.inlineCallbacks  # type: ignore[arg-type]
+    def execute(  # type: ignore[misc]
+        self, request: GetConfigRequest
+    ) -> defer.Deferred[GetConfigResponse]:
         if request.version is not None:
             config = yield self._repository.get_by_version(
                 request.service, request.version

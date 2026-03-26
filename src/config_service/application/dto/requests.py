@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class SaveConfigRequest:
     service: str
     yaml_content: str
@@ -15,6 +15,6 @@ class GetConfigRequest:
     template_context: dict[str, str] = field(default_factory=dict)
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class GetHistoryRequest:
     service: str

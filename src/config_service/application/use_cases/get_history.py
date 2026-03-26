@@ -11,12 +11,14 @@ class GetHistoryUseCase:
     def __init__(self, repository: IConfigurationRepository) -> None:
         self._repository = repository
 
-    @defer.inlineCallbacks
-    def execute(self, request: GetHistoryRequest) -> defer.Deferred:
+    @defer.inlineCallbacks  # type: ignore[arg-type]
+    def execute(  # type: ignore[misc]
+        self, request: GetHistoryRequest
+    ) -> defer.Deferred[GetHistoryResponse]:
         configs = yield self._repository.get_history(request.service)
 
         items = [
-            HistoryItem(version=config.version, created_at=config.created_at)  # type: ignore[arg-type]
+            HistoryItem(version=config.version, created_at=config.created_at)
             for config in configs
         ]
         return GetHistoryResponse(items=items)

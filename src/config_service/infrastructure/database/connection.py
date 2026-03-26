@@ -7,7 +7,7 @@ from twisted.enterprise import adbapi
 
 def _setup_connection(conn: object) -> None:
     """Регистрирует кодек JSON/JSONB, чтобы колонки payload возвращались как dict."""
-    psycopg2.extras.register_default_jsonb(conn, loads=json.loads)  # type: ignore[arg-type]
+    psycopg2.extras.register_default_jsonb(conn, loads=json.loads)
 
 
 def create_connection_pool() -> adbapi.ConnectionPool:

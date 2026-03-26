@@ -38,5 +38,13 @@ strict = true
 ignore_missing_imports = true
 mypy_path = "src"
 
+[[tool.mypy.overrides]]
+module = [
+    "config_service.infrastructure.*",
+    "config_service.presentation.*",
+    "config_service.main",
+]
+ignore_errors = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

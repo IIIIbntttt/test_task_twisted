@@ -40,11 +40,10 @@ dependencies = [
     { name = "orjson" },
     { name = "psycopg2-binary" },
     { name = "pyyaml" },
-    { name = "ruff" },
     { name = "twisted" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "mypy" },
     { name = "pytest" },
@@ -58,18 +57,20 @@ requires-dist = [
     { name = "dependency-injector" },
     { name = "jinja2" },
     { name = "klein" },
-    { name = "mypy", marker = "extra == 'dev'" },
     { name = "orjson" },
     { name = "psycopg2-binary" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-twisted", marker = "extra == 'dev'" },
     { name = "pyyaml" },
-    { name = "ruff", specifier = ">=0.15.7" },
-    { name = "ruff", marker = "extra == 'dev'" },
     { name = "twisted" },
-    { name = "types-pyyaml", marker = "extra == 'dev'" },
 ]
-provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-twisted" },
+    { name = "ruff" },
+    { name = "types-pyyaml" },
+]
 
 [[package]]
 name = "constantly"

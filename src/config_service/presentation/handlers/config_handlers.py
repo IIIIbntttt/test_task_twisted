@@ -36,26 +36,25 @@ def create_config(
     save_uc: SaveConfigUseCase, request: Request, service: str
 ) -> defer.Deferred[bytes]:
     """Сохраняет новую конфигурацию для сервиса."""
-    body = request.content.read().decode("utf-8")
+    assert request.content is not None
+    try:
+        body = request.content.read().decode("utf-8")
+    except UnicodeDecodeError:
+        return _json(request, 400, {"error": "Request body must be UTF-8 encoded"})
+
     try:
         result = yield save_uc.execute(
             SaveConfigRequest(service=service, yaml_content=body)
         )
-        return _json(
-            request,
-            200,
-            {
-                "service": result.service,
-                "version": result.version,
-                "status": result.status,
-            },
-        )
+        return _json(request, 200, result.to_dict())
     except InvalidYamlError as exc:
         return _json(request, 400, {"error": str(exc)})
     except ValidationError as exc:
         return _json(request, 422, {"errors": exc.errors})
     except DuplicateVersionError as exc:
         return _json(request, 409, {"error": str(exc)})
+    except Exception:
+        return _json(request, 500, {"error": "Internal server error"})
 
 
 @defer.inlineCallbacks
@@ -63,9 +62,17 @@ def get_config(
     get_uc: GetConfigUseCase, request: Request, service: str
 ) -> defer.Deferred[bytes]:
     """Возвращает конфигурацию сервиса. Поддерживает выбор версии и Jinja2-рендеринг."""
-    version_raw = request.args.get(b"version", [None])[0]
-    version = int(version_raw) if version_raw is not None else None
-    use_template = request.args.get(b"template", [b"0"])[0] == b"1"
+    args = request.args or {}
+    version_raw = args.get(b"version", [None])[0]
+    if version_raw is not None:
+        try:
+            version: int | None = int(version_raw)
+        except ValueError:
+            return _json(request, 400, {"error": "version must be an integer"})
+    else:
+        version = None
+
+    use_template = args.get(b"template", [b"0"])[0] == b"1"
 
     try:
         result = yield get_uc.execute(
@@ -79,6 +86,8 @@ def get_config(
         return _json(request, 200, result.payload)
     except ConfigurationNotFoundError as exc:
         return _json(request, 404, {"error": str(exc)})
+    except Exception:
+        return _json(request, 500, {"error": "Internal server error"})
 
 
 @defer.inlineCallbacks
@@ -91,3 +100,5 @@ def get_history(
         return _json(request, 200, [item.to_dict() for item in result.items])
     except ConfigurationNotFoundError as exc:
         return _json(request, 404, {"error": str(exc)})
+    except Exception:
+        return _json(request, 500, {"error": "Internal server error"})

@@ -5,7 +5,7 @@ import pytest
 from config_service.application.dto.requests import SaveConfigRequest
 from config_service.application.use_cases.save_config import SaveConfigUseCase
 from config_service.domain.exceptions import DuplicateVersionError, ValidationError
-from config_service.infrastructure.serialization.yaml_parser import YamlParser
+from config_service.infrastructure.serialization.yaml_parser import parse_yaml
 from tests.conftest import resolved
 
 _VALID_YAML = """
@@ -31,7 +31,7 @@ features:
 
 
 def _make_use_case(repo: MagicMock) -> SaveConfigUseCase:
-    return SaveConfigUseCase(repo, YamlParser())
+    return SaveConfigUseCase(repo, parse_yaml)
 
 
 @pytest.inlineCallbacks  # type: ignore[misc]
@@ -65,6 +65,7 @@ def test_save_config_auto_assigns_version() -> None:
     repo.get_next_version.assert_called_once_with("svc")
 
 
+@pytest.inlineCallbacks  # type: ignore[misc]
 def test_invalid_yaml_raises_error() -> None:
     repo = MagicMock()
     uc = _make_use_case(repo)
@@ -72,7 +73,7 @@ def test_invalid_yaml_raises_error() -> None:
     from config_service.domain.exceptions import InvalidYamlError
 
     with pytest.raises(InvalidYamlError):
-        uc.execute(SaveConfigRequest(service="svc", yaml_content=_INVALID_YAML))
+        yield uc.execute(SaveConfigRequest(service="svc", yaml_content=_INVALID_YAML))
 
 
 @pytest.inlineCallbacks  # type: ignore[misc]

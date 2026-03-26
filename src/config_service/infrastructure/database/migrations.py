@@ -13,5 +13,5 @@ CREATE TABLE IF NOT EXISTS configurations (
 """
 
 
-def run_migrations(pool: adbapi.ConnectionPool) -> Deferred:
-    return pool.runOperation(_CREATE_TABLE)  # type: ignore[return-value]
+def run_migrations(pool: adbapi.ConnectionPool) -> Deferred[None]:
+    return pool.runOperation(_CREATE_TABLE)
